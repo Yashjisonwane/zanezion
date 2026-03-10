@@ -101,9 +101,7 @@ const ClientOrders = () => {
     };
 
     const handleCreateManifest = () => {
-        setSelectedOrder(null);
-        setModalType('add');
-        setIsModalOpen(true);
+        navigate('/dashboard/store?tab=sheet');
     };
 
     const handleSaveOrder = (orderData) => {

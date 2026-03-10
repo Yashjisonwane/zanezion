@@ -68,7 +68,8 @@ const menuItems = {
   ],
   client: [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-    { icon: ShoppingBag, label: 'Place Order', path: '/dashboard/store' },
+    { icon: ShoppingBag, label: 'Marketplace', path: '/dashboard/store?tab=catalog' },
+    { icon: FileText, label: 'Custom Requisition', path: '/dashboard/store?tab=sheet' },
     { icon: Package, label: 'My Orders', path: '/dashboard/client-orders' },
     { icon: Calendar, label: 'Concierge Events', path: '/dashboard/client-events' },
     { icon: Truck, label: 'Track Delivery', path: '/dashboard/track-delivery' },
@@ -114,6 +115,11 @@ const Sidebar = ({ isOpen, toggleSidebar, role }) => {
     return true;
   });
 
+  const { clients } = useData();
+  const clientBranding = userRole === 'client'
+    ? (clients || []).find(c => String(c.id).replace('CLT-', '') === String(currentUser?.clientId).replace('CLT-', '') || c.name === currentUser.name)?.branding
+    : null;
+
   return (
     <>
       <AnimatePresence>
@@ -137,11 +143,15 @@ const Sidebar = ({ isOpen, toggleSidebar, role }) => {
         <div className="p-4 md:p-6 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-2 group cursor-pointer" onClick={() => navigate('/dashboard')}>
             <div className="w-10 h-10 md:w-12 md:h-12 bg-white border border-white/10 rounded-xl flex items-center justify-center shadow-2xl overflow-hidden shrink-0 transition-transform group-hover:scale-105">
-              <img src="/logo.png" alt="ZaneZion" className="w-full h-full object-contain scale-[2.2] brightness-0" />
+              <img src={clientBranding?.logo || "/logo.png"} alt={clientBranding?.businessName || "ZaneZion"} className="w-full h-full object-contain scale-[2.2] brightness-0" />
             </div>
             <div className="flex flex-col whitespace-nowrap overflow-hidden">
-              <span className="text-base md:text-lg font-bold tracking-tighter text-white group-hover:text-accent transition-colors">ZANEZION</span>
-              <span className="text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-accent uppercase -mt-1 opacity-80 group-hover:opacity-100">Institutional</span>
+              <span className="text-base md:text-lg font-bold tracking-tighter text-white group-hover:text-accent transition-colors uppercase">
+                {clientBranding?.businessName || "ZANEZION"}
+              </span>
+              <span className="text-[9px] md:text-[10px] font-bold tracking-[0.3em] text-accent uppercase -mt-1 opacity-80 group-hover:opacity-100 italic">
+                {clientBranding?.tagline || "Institutional"}
+              </span>
             </div>
           </div>
           {isMobile && (

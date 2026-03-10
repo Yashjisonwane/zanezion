@@ -11,6 +11,7 @@ const StatusBadge = ({ status, className }) => {
       case 'approved':
         return 'bg-success/10 text-success border-success/20';
       case 'pending':
+      case 'pending review':
       case 'preparing':
       case 'warning':
       case 'planning':

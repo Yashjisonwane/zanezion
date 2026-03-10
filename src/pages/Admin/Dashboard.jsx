@@ -98,7 +98,9 @@ const Dashboard = () => {
     },
   ];
 
-  const recentOrders = (orders || []).slice(0, 3);
+  const recentOrders = useMemo(() => {
+    return [...(orders || [])].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  }, [orders]);
 
   // Mock data for Chauffeur Service based on fleet or orders
   const activeChauffeurs = useMemo(() => {
@@ -196,7 +198,7 @@ const Dashboard = () => {
         {[
           { label: 'Institutional Assets', value: `$${(inventory.reduce((a, b) => a + (b.price * b.qty), 0) / 1000).toFixed(1)}K`, icon: Package, color: 'text-accent', trend: '+12.4%', detail: 'Asset Valuation' },
           { label: 'System Liquidity', value: `$${(invoices.filter(i => i.status === 'Paid').reduce((a, b) => a + b.totalAmount, 0) / 1000).toFixed(1)}K`, icon: DollarSign, color: 'text-success', trend: '+8.2%', detail: 'Settled Ledger' },
-          { label: 'Open Requisitions', value: orders.filter(o => o.status === 'Processing' || o.status === 'Pending').length, icon: FileText, color: 'text-info', trend: 'Active', detail: 'Mission Pipeline' },
+          { label: 'Open Requisitions', value: orders.filter(o => ['Processing', 'Pending', 'Pending Review'].includes(o.status)).length, icon: FileText, color: 'text-info', trend: 'Active', detail: 'Mission Pipeline' },
           { label: 'Asset Loss (MTD)', value: `$${stockMovements.filter(m => m.type === 'Loss').reduce((a, b) => a + (b.value || 0), 0)}`, icon: Activity, color: 'text-danger', trend: 'Audit', detail: 'Loss Prevention' }
         ].map((stat, idx) => (
           <div key={idx} className="glass-card p-5 sm:p-6 relative overflow-hidden group hover:border-accent/30 transition-all border-white/5 bg-gradient-to-br from-white/[0.02] to-transparent">

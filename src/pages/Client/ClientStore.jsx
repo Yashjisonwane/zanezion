@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/GlobalDataContext';
-import { ShoppingCart, Search, Filter, Plus, Minus, X, Check, Package, DollarSign, FileText, ChevronRight, Zap } from 'lucide-react';
+import { ShoppingCart, Search, Filter, Plus, Minus, X, Check, Package, DollarSign, FileText, ChevronRight, Zap, Truck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ClientStore = () => {
     const { inventory, cart, addToCart, removeFromCart, clearCart, addOrder, currentUser, clients } = useData();
     const navigate = useNavigate();
+    const location = useLocation();
     const [activeTab, setActiveTab] = useState('catalog');
     const [customItems, setCustomItems] = useState([{ name: '', qty: 1 }]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isCartOpen, setIsCartOpen] = useState(false);
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const tab = params.get('tab');
+        if (tab === 'sheet' || tab === 'custom') {
+            setActiveTab('sheet');
+        } else if (tab === 'catalog') {
+            setActiveTab('catalog');
+        }
+    }, [location]);
 
     const filteredInventory = inventory.filter(item =>
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -44,74 +55,87 @@ const ClientStore = () => {
             ? cart.map(i => ({ name: i.name, qty: i.qty, price: i.price, vendorName: i.vendorName }))
             : customItems.filter(i => i.name.trim() !== '').map(i => ({ name: i.name, qty: parseInt(i.qty), price: 0, custom: true }));
 
-        if (items.length === 0) return;
+        if (items.length === 0) {
+            alert("Error: Manifest must contain at least one item.");
+            return;
+        }
+
+        const isBespoke = activeTab === 'sheet';
+        const orderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
 
         const orderData = {
+            id: orderId,
             client: myClient?.name || currentUser.name,
-            clientId: myClient?.id || currentUser.clientId || 'CLT-GUEST',
+            clientId: myClient?.id || currentUser.clientId || 1,
             items: items,
             total: activeTab === 'catalog' ? cartTotal : 0,
-            status: 'Pending',
+            status: 'Pending Review',
             deliveryType: deliveryMode,
             location: currentUser.location || 'Client Hub',
             date: new Date().toISOString().split('T')[0],
             createdAt: new Date().toISOString(),
-            orderType: activeTab === 'catalog' ? 'Marketplace' : 'Custom Sheet'
+            orderType: isBespoke ? 'Bespoke Manifest' : 'Marketplace Protocol'
         };
 
         addOrder(orderData);
-        if (activeTab === 'catalog') clearCart();
-        else setCustomItems([{ name: '', qty: 1 }]);
+
+        if (activeTab === 'catalog') {
+            clearCart();
+        } else {
+            setCustomItems([{ name: '', qty: 1 }]);
+        }
 
         setIsCartOpen(false);
+        alert(`${isBespoke ? 'Bespoke Manifest' : 'Order'} Submitted Successfully!\nOrder ID: ${orderId}\n\nOur operations team has been notified for institutional review.`);
         navigate('/dashboard/client-orders');
     };
 
     return (
         <div className="space-y-6 sm:space-y-8 relative pb-24 md:pb-20">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">ZaneZion Store</h1>
-                    <p className="text-secondary mt-1">Orchestrate logistics for catalog inventory or bespoke custom manifests.</p>
+                    <h1 className="text-4xl font-black tracking-tighter text-white italic uppercase bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">ZaneZion Marketplace</h1>
+                    <p className="text-secondary mt-1 font-black uppercase tracking-[0.3em] text-[10px] opacity-60">Global procurement and bespoke manifest orchestrator.</p>
                 </div>
+
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-                    {/* Tab Switcher */}
-                    <div className="flex bg-background border border-border rounded-xl overflow-hidden p-1">
+                    {/* Tab Switcher - Premium Styled */}
+                    <div className="flex bg-[#0A0A0B] border border-white/10 rounded-2xl p-1.5 shadow-2xl">
                         <button
                             onClick={() => setActiveTab('catalog')}
-                            className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all rounded-lg ${activeTab === 'catalog' ? 'bg-accent text-black' : 'text-muted hover:text-white'}`}
+                            className={`px-8 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl flex items-center gap-2 ${activeTab === 'catalog' ? 'bg-accent text-black shadow-[0_0_20px_rgba(200,169,106,0.3)]' : 'text-muted hover:text-white'}`}
                         >
-                            Catalog
+                            <ShoppingCart size={14} /> Catalog
                         </button>
                         <button
                             onClick={() => setActiveTab('sheet')}
-                            className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all rounded-lg ${activeTab === 'sheet' ? 'bg-accent text-black' : 'text-muted hover:text-white'}`}
+                            className={`px-8 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all rounded-xl flex items-center gap-2 ${activeTab === 'sheet' ? 'bg-accent text-black shadow-[0_0_20px_rgba(200,169,106,0.3)]' : 'text-muted hover:text-white'}`}
                         >
-                            Custom
+                            <FileText size={14} /> Bespoke
                         </button>
                     </div>
 
-                    {/* Quick Tools */}
                     {activeTab === 'catalog' && (
                         <div className="flex items-center gap-3">
-                            <div className="relative">
+                            <div className="relative group">
                                 <input
                                     type="text"
-                                    placeholder="Search catalog..."
-                                    className="bg-[#141417] border border-white/5 rounded-xl py-2 pl-10 pr-4 text-xs text-white focus:outline-none focus:border-accent/40 w-full sm:w-48 transition-all"
+                                    placeholder="Search Inventory..."
+                                    className="bg-white/5 border border-white/10 rounded-2xl py-2.5 pl-10 pr-4 text-[10px] font-bold uppercase tracking-widest text-white focus:outline-none focus:border-accent/40 w-full sm:w-48 transition-all hover:bg-white/10"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted/40" size={14} />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted/40 group-focus-within:text-accent transition-colors" size={14} />
                             </div>
                             <button
                                 onClick={() => setIsCartOpen(true)}
-                                className="relative p-2.5 bg-white/5 border border-border rounded-xl text-accent hover:bg-white/10 transition-all shrink-0"
+                                className="relative p-2.5 bg-accent/10 border border-accent/20 rounded-2xl text-accent hover:bg-accent hover:text-black transition-all shrink-0 group shadow-xl"
+                                title="View Manifest"
                             >
-                                <ShoppingCart size={18} />
+                                <ShoppingCart size={20} className="group-hover:scale-110 transition-transform" />
                                 {cart.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-danger text-white text-[8px] font-bold rounded-full flex items-center justify-center border border-background">
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-black text-[9px] font-black rounded-full flex items-center justify-center border-2 border-[#141417] animate-bounce">
                                         {cart.length}
                                     </span>
                                 )}

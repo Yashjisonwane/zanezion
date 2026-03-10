@@ -23,10 +23,16 @@ export const GlobalDataProvider = ({ children }) => {
             inventory: "Stable",
             status: "Active",
             source: 'Manual',
-            clientType: 'Personal',
-            plan: 'Executive',
+            clientType: 'SaaS',
+            plan: 'Platinum Protocol',
             billingCycle: 'Monthly',
-            paymentMethod: 'Wire Transfer'
+            paymentMethod: 'Wire Transfer',
+            branding: {
+                businessName: "Goldwynn Residences",
+                logo: "/logo.png", // Using existing logo for now, but path is ready
+                primaryColor: "#c8a96a",
+                tagline: "Ultra-Luxury Living & Logistics"
+            }
         },
         {
             id: 'CLT-002',
@@ -83,7 +89,7 @@ export const GlobalDataProvider = ({ children }) => {
         { id: 4, name: "Kezia Clarke", email: "kezia@zanezion.com", password: "staff", role: "Operational Staff", status: "Active", joinedDate: '2022-06-05', isSalaried: true, vacationBalance: 80, bankingInfo: { bank: 'Scotiabank Bahamas', account: '****5509', routing: '00403', method: 'Direct Deposit' } },
         { id: 5, name: "Jaheem Brown", email: "jaheem@zanezion.com", password: "staff", role: "Field Staff", status: "Active", joinedDate: '2023-08-12', isSalaried: false, vacationBalance: 0, bankingInfo: { bank: 'Commonwealth Bank', account: '****2284', routing: '00100', method: 'Direct Deposit' }, isAvailable: true },
         { id: 6, name: "Andre Rolle", email: "andre@zanezion.com", password: "staff", role: "Field Staff", status: "Active", joinedDate: '2016-02-28', isSalaried: false, vacationBalance: 0, bankingInfo: { bank: 'Fidelity Bank Bahamas', account: '****6612', routing: '00504', method: 'Direct Deposit' }, isAvailable: false },
-        { id: 7, name: "John Pemberton", email: "pemberton@goldwynn.com", password: "client", role: "client", status: "Active", joinedDate: '2024-01-10', clientId: 1 },
+        { id: 7, name: "John Pemberton", email: "pemberton@goldwynn.com", password: "client", role: "client", status: "Active", joinedDate: '2024-01-10', clientId: 'CLT-001' },
     ]);
 
     const [purchaseRequests, setPurchaseRequests] = useState([
@@ -97,9 +103,9 @@ export const GlobalDataProvider = ({ children }) => {
     ]);
 
     const [orders, setOrders] = useState([
-        { id: 'ORD-001', clientId: 1, client: 'Goldwynn Residences', items: [{ name: 'Dom Perignon Champagne', qty: 6, price: 350 }], total: 2100, vendorId: 2, vendor: 'Nassau Wine & Spirits', status: 'Delivered', date: '2025-03-01', createdAt: '2025-03-01T08:00:00Z', type: 'Provisioning' },
-        { id: 'ORD-002', clientId: 2, client: 'SY Azure', items: [{ name: 'Fresh Atlantic Lobster', qty: 10, price: 85 }], total: 850, vendorId: 1, vendor: 'Caribbean Fine Provisions', status: 'In Transit', date: '2025-03-02', createdAt: '2025-03-02T09:00:00Z', type: 'Procurement' },
-        { id: 'ORD-003', clientId: 3, client: 'Lyford Cay Estate', items: [{ name: 'Egyptian Cotton Linens', qty: 20, price: 45 }], total: 900, vendorId: 4, vendor: 'Island Linen & Hospitality', status: 'Processing', date: '2025-03-02', createdAt: '2025-03-02T11:00:00Z', type: 'Inventory' },
+        { id: 'ORD-001', clientId: 'CLT-001', client: 'Goldwynn Residences', items: [{ name: 'Dom Perignon Champagne', qty: 6, price: 350 }], total: 2100, vendorId: 2, vendor: 'Nassau Wine & Spirits', status: 'Delivered', date: '2025-03-01', createdAt: '2025-03-01T08:00:00Z', type: 'Provisioning' },
+        { id: 'ORD-002', clientId: 'CLT-002', client: 'SY Azure', items: [{ name: 'Fresh Atlantic Lobster', qty: 10, price: 85 }], total: 850, vendorId: 1, vendor: 'Caribbean Fine Provisions', status: 'In Transit', date: '2025-03-02', createdAt: '2025-03-02T09:00:00Z', type: 'Procurement' },
+        { id: 'ORD-003', clientId: 'CLT-003', client: 'Lyford Cay Estate', items: [{ name: 'Egyptian Cotton Linens', qty: 20, price: 45 }], total: 900, vendorId: 4, vendor: 'Island Linen & Hospitality', status: 'Processing', date: '2025-03-02', createdAt: '2025-03-02T11:00:00Z', type: 'Inventory' },
     ]);
 
     const [invoices, setInvoices] = useState([
@@ -687,6 +693,11 @@ export const GlobalDataProvider = ({ children }) => {
 
     const updateClient = (updated) => setClients(prev => prev.map(c => c.id === updated.id ? updated : c));
 
+    const updateClientBranding = (clientId, branding) => {
+        setClients(prev => prev.map(c => c.id === clientId ? { ...c, branding } : c));
+        addLog({ action: 'Branding Updated', detail: `Institutional identity recalibrated for ${clientId}.`, type: 'system' });
+    };
+
     const deleteClient = (id) => {
         setClients(prev => prev.filter(c => c.id !== id));
         addLog({ action: 'Client Decommission', detail: `Removed client reference ${id}.`, type: 'system' });
@@ -1068,7 +1079,7 @@ export const GlobalDataProvider = ({ children }) => {
 
     return (
         <GlobalDataContext.Provider value={{
-            clients, setClients, addClient, updateClient, deleteClient,
+            clients, setClients, addClient, updateClient, deleteClient, updateClientBranding,
             vendors, setVendors, addVendor, updateVendor, deleteVendor,
             inventory, setInventory, addInventory, updateInventory, deleteInventory,
             orders, addOrder, updateOrder, deleteOrder,

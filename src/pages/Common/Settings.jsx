@@ -4,11 +4,20 @@ import { User, Shield, Bell, Globe, CreditCard, Save, CheckCircle, Smartphone, L
 import { useData } from '../../context/GlobalDataContext';
 
 const Settings = () => {
-  const { currentUser, setCurrentUser, updateUser, deliveryPricing, setDeliveryPricing } = useData();
+  const { currentUser, setCurrentUser, updateUser, deliveryPricing, setDeliveryPricing, clients, updateClientBranding } = useData();
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState({ ...currentUser });
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' });
+
+  // Get current client data if it's a client
+  const clientData = currentUser.role === 'client' ? clients.find(c => c.id === currentUser.clientId) : null;
+
+  const [branding, setBranding] = useState({
+    businessName: clientData?.branding?.businessName || 'ZaneZion',
+    tagline: clientData?.branding?.tagline || 'Institutional management and luxury asset tracking.',
+    logo: clientData?.branding?.logo || '/logo.png'
+  });
 
   const [notifications, setNotifications] = useState({
     emailAlerts: true,
@@ -104,6 +113,7 @@ const Settings = () => {
     { id: 'access', label: 'Roles & Access', icon: Shield, roles: ['superadmin'] },
     { id: 'logistics', label: 'Logistics Protocol', icon: Truck, roles: ['superadmin'] },
     { id: 'security', label: 'Security', icon: Lock, roles: ['superadmin', 'client'] },
+    { id: 'branding', label: 'White-Label Branding', icon: Globe, roles: ['superadmin', 'client'] },
     { id: 'notifications', label: 'Notifications', icon: Bell, roles: ['superadmin', 'client'] },
     { id: 'billing', label: 'Billing', icon: CreditCard, roles: ['superadmin', 'client'] },
   ];
@@ -422,6 +432,66 @@ const Settings = () => {
                       Multi-Factor Authentication (MFA) is managed by the Super Admin level.
                     </p>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'branding' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="glass-card p-6 lg:p-8">
+                <h3 className="text-xl font-bold mb-8 flex items-center gap-2">
+                  <Globe size={22} className="text-accent" /> Institutional Branding (White-Label)
+                </h3>
+                <p className="text-xs text-secondary mb-8 -mt-6">Configure how your platform appears to your sub-users and staff.</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-muted uppercase tracking-widest">Business Display Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Goldwynn Residences"
+                        className="w-full bg-background border border-border rounded-xl px-5 py-3 text-sm focus:border-accent outline-none font-medium"
+                        value={branding.businessName}
+                        onChange={(e) => setBranding({ ...branding, businessName: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-muted uppercase tracking-widest">Platform Tagline</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Ultra-Luxury Living"
+                        className="w-full bg-background border border-border rounded-xl px-5 py-3 text-sm focus:border-accent outline-none font-medium"
+                        value={branding.tagline}
+                        onChange={(e) => setBranding({ ...branding, tagline: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-white/5 rounded-[2rem] bg-white/[0.01]">
+                    <div className="w-24 h-24 bg-white rounded-2xl flex items-center justify-center mb-4 overflow-hidden shadow-2xl">
+                      <img src={branding.logo} className="w-full h-full object-contain scale-[2.2] brightness-0" alt="Logo Preview" />
+                    </div>
+                    <button className="text-[10px] font-black uppercase tracking-widest text-accent hover:underline">Upload Custom Logo</button>
+                    <p className="text-[9px] text-muted mt-2 uppercase tracking-tight">SVG or PNG Preferred (Max 2MB)</p>
+                  </div>
+                </div>
+
+                <div className="mt-12 pt-8 border-t border-border flex justify-end">
+                  <button
+                    onClick={() => {
+                      if (currentUser.role === 'client') {
+                        updateClientBranding(currentUser.clientId, branding);
+                        alert("✅ Institutional Branding Updated: Changes are now live across your enterprise nodes.");
+                      } else {
+                        alert("❌ Access Denied: White-labeling settings are only available for Institutional SaaS accounts.");
+                      }
+                    }}
+                    className="btn-primary px-10"
+                  >
+                    Apply Branding
+                  </button>
                 </div>
               </div>
             </div>

@@ -61,21 +61,23 @@ const ClientDashboard = () => {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white italic uppercase">Client Portal</h1>
-            <p className="text-secondary text-[10px] md:text-xs mt-1 font-black uppercase tracking-[0.2em] opacity-70">Institutional management and luxury asset tracking.</p>
+            <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white italic uppercase">{clientData?.branding?.businessName || "Client"} Portal</h1>
+            <p className="text-secondary text-[10px] md:text-xs mt-1 font-black uppercase tracking-[0.2em] opacity-70">{clientData?.branding?.tagline || "Institutional management and luxury asset tracking."}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button
-              onClick={() => navigate('/dashboard/support')}
-              className="btn-secondary text-xs"
+              onClick={() => navigate('/dashboard/store?tab=sheet')}
+              className="px-6 py-2.5 bg-white/5 border border-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.25em] hover:bg-accent hover:text-black hover:border-accent transition-all font-body active:scale-[0.98] flex items-center gap-2 group shadow-xl"
             >
-              Contact Support
+              <FileText size={14} className="group-hover:rotate-12 transition-transform" />
+              Custom Requisition
             </button>
             <button
               onClick={() => navigate('/dashboard/store')}
-              className="btn-primary text-xs px-6"
+              className="btn-primary text-[10px] px-8 py-2.5 md:px-12 flex items-center gap-3 shadow-[0_0_30px_rgba(200,169,106,0.3)]"
             >
-              Initialize New Order
+              <ShoppingBag size={14} />
+              Open Marketplace
             </button>
           </div>
         </div>
@@ -353,6 +355,8 @@ const ClientDashboard = () => {
               <h3 className="text-lg font-black text-white italic uppercase tracking-tighter mb-6">Quick Protocols</h3>
               <div className="space-y-2">
                 {[
+                  { label: "Marketplace Entry", path: "/dashboard/store?tab=catalog" },
+                  { label: "Custom Requisition", path: "/dashboard/store?tab=sheet" },
                   { label: "Request Concierge", path: "/dashboard/client-events" },
                   { label: "Audit Inventory", path: "/dashboard/client-inventory" },
                   { label: "Security Settings", path: "/dashboard/settings" }
@@ -360,10 +364,10 @@ const ClientDashboard = () => {
                   <button
                     key={i}
                     onClick={() => navigate(action.path)}
-                    className="w-full py-3 bg-white/5 border border-border text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-between px-4 group font-body active:scale-[0.98]"
+                    className="w-full py-3 bg-white/5 border border-border text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-accent/40 transition-all flex items-center justify-between px-4 group font-body active:scale-[0.98]"
                   >
-                    {action.label}
-                    <ChevronRight size={14} className="text-muted group-hover:text-accent transition-colors" />
+                    <span>{action.label}</span>
+                    <ChevronRight size={14} className="text-muted group-hover:text-accent group-hover:translate-x-1 transition-all" />
                   </button>
                 ))}
               </div>
